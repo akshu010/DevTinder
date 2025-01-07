@@ -18,12 +18,6 @@ const userAuth = (req, res, next) => {
       next();
     }
   };
-
-
-
-
-
-
 module.exports = {
   adminAuth,
   userAuth
