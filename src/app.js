@@ -4,8 +4,12 @@ const app = express();
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
+app.use(cookieParser());
 // Signup API for the user
 app.post("/signup", async (req, res) => {
   try {
@@ -38,6 +42,14 @@ app.post("/login", async (req, res) => {
     }
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (isValidPassword) {
+      const token = await jwt.sign(
+        { _id: user._id },
+        "DEV@TINDERBYAKSHAYSHARMA",
+        { expiresIn: "3d" }
+      );
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 48 * 3600000),
+      });
       res.send("Login Sucessfull!!!");
     } else {
       throw new Error("Invalid Credentials");
@@ -45,71 +57,24 @@ app.post("/login", async (req, res) => {
   } catch (err) {
     res.status(400).send("ERROR : " + err.message);
   }
-}); 
-
-// get user by email id
-app.get("/user", async (req, res) => {
-  const userEmail = req.body.emailId;
-  //   const users = await User.findOne({ emailId: userEmail });
-  //   res.send(users);
-  // });
+});
+// API to get the user profile
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const users = await User.find({ emailId: userEmail });
-    if (users.lenght === 0) {
-      res.status(404).send("USer not found");
-    } else {
-      res.send(users);
+    const user = req.user;
+    if (!user) {
+      throw new Error("User does not exist");
     }
+    res.send(user);
   } catch (err) {
-    res.status(404).send("USer not found");
+    res.status(400).send("ERROR : " + err.message);
   }
 });
 
-// Feed API - get / feed - get all the user from the database
-
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.send(users);
-  } catch (err) {
-    res.status(404).send("USer not found");
-  }
-});
-
-// Delete a user API
-
-app.delete("/user", async (req, res) => {
-  const userId = req.body.userId;
-  try {
-    const user = await User.findByIdAndDelete(userId);
-    res.send("User deletted Sucessfully");
-  } catch (err) {
-    res.status(404).send("USer not found");
-  }
-});
-
-// API for update the data of the user
-app.patch("/user/:userId", async (req, res) => {
-  const userId = req.params?.userId;
-  const data = req.body;
-  try {
-    const ALLOWED_UPDATES = ["skills", "age", "about", "gender", "photoUrl"];
-    const isUpdateAllowed = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    if (!isUpdateAllowed) {
-      throw new Error("Update not allowed");
-    }
-    if (data?.skills.length > 10) {
-      throw new Error("Skills can't be more than 10");
-    }
-    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
-      runValidators: true,
-    });
-    res.send("User updated sucessfully");
-  } catch (err) {
-    res.status(404).send("Update Failed " + err.message);
-  }
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+  const user = req.user;
+  console.log("Sending Connection Request");
+  res.send(user.firstName + " sent you a friend request");
 });
 
 // Connect to the database
