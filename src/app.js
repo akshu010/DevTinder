@@ -1,7 +1,6 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
-const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/authenication");
 const profileRouter = require("./routes/profile");

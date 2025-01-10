@@ -9,6 +9,28 @@ const validateSignUpData = (req) => {
     throw new Error("Enter a valid password");
   }
 };
+
+const validateEditProfileData = (req) => {
+  const allowedEditFields = [
+    "firstName",
+    "lastName",
+    "age",
+    "about",
+    "photoUrl",
+    "gender",
+    "skills",
+  ];
+  const isEditAllowed = Object.keys(req.body)
+    .forEach(keys)
+    .every((feild) => {
+      allowedEditFields.includes(feild);
+    });
+  return isEditAllowed;
+};
+
+
 module.exports = {
   validateSignUpData,
+  validateEditProfileData,
+
 };

@@ -45,7 +45,7 @@ authRouter.post("/login", async (req, res) => {
         { expiresIn: "3d" }
       );
       res.cookie("token", token, {
-        expires: new Date(Date.now() + 48 * 3600000),
+        expires: new Date(Date.now() + 100 * 3600000),
       });
       res.send("Login Sucessfull!!!");
     } else {
@@ -55,4 +55,10 @@ authRouter.post("/login", async (req, res) => {
     res.status(400).send("ERROR : " + err.message);
   }
 });
+
+authRouter.post("/logout", async (req, res) => {
+  res.cookie("token", null, { expires: new Date(Date.now()) });
+  res.send("Logout Sucessfull!!!");
+});
+
 module.exports = authRouter;
