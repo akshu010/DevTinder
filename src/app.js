@@ -23,7 +23,7 @@ connectDB()
   .then(() => {
     console.log("DataBase connected sucesssfullly");
     app.listen(7777, () => {
-      console.log("Server is running on the port 3000");
+      console.log("Server is running on the port 7777");
     });
   })
   .catch((err) => {
